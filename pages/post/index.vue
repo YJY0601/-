@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    首页
+    旅游首页
   </div>
 </template>
 

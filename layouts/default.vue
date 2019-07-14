@@ -1,9 +1,11 @@
 
 <template>
   <div>
+    <!-- 头部组件 -->
     <Header />
     <!-- 内容占位组件 -->
     <nuxt />
+    <!-- 底部组件 -->
     <Footer />
   </div>
 </template>
@@ -44,8 +46,6 @@ ol {
 a {
   text-decoration: none;
   color: inherit;
-}
-a:hover {
 }
 em,
 i {

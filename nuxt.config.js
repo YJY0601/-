@@ -31,7 +31,8 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '@/plugins/element-ui'
+    '@/plugins/element-ui',
+    { src: '@/plugins/localStorage', ssr: false }
   ],
   /*
   ** Nuxt.js modules
@@ -54,6 +55,7 @@ export default {
   */
   build: {
     transpile: [/^element-ui/],
+
     /*
     ** You can extend webpack config here
     */
