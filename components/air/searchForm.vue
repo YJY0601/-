@@ -28,31 +28,24 @@
         <el-form
           :model="form"
           status-icon
-          :rules="rules"
-          ref="ruleForm"
+          ref="form"
           label-width="80px"
           class="demo-ruleForm"
         >
-          <el-form-item
-            label="出发城市"
-            prop="pass"
-          >
+          <el-form-item label="出发城市">
             <el-autocomplete
-              v-model="state4"
+              v-model="form.departCity"
               :fetch-suggestions="queryDepartSearch"
-              placeholder="请输入出发城市"
+              placeholder="请搜索出发城市"
               @select="handleDepartSelect"
               style="width: 100%;"
             ></el-autocomplete>
           </el-form-item>
-          <el-form-item
-            label="到达城市"
-            prop="checkPass"
-          >
+          <el-form-item label="到达城市">
             <el-autocomplete
-              v-model="state4"
+              v-model="form.destCity"
               :fetch-suggestions="queryDestSearch"
-              placeholder="请输入到达城市"
+              placeholder="请搜索到达城市"
               @select="handleDestSelect"
               style="width: 100%;"
             ></el-autocomplete>
@@ -63,6 +56,8 @@
               placeholder="选择日期"
               style="width: 100%;"
               @change="handleDate"
+              :picker-options="pickerOptions"
+              v-model="form.departDate"
             >
             </el-date-picker>
           </el-form-item>
@@ -71,7 +66,8 @@
               type="primary"
               style="width:100%"
               @click="handleSubmit"
-            >提交</el-button>
+            ><i class="el-icon-search"></i>
+              搜索</el-button>
           </el-form-item>
         </el-form>
         <div class="reverse">
@@ -84,42 +80,159 @@
 </template>
 
 <script>
+import moment from "moment";
 export default {
   data() {
     return {
+      pickerOptions: {
+        disabledDate(time) {
+          // console.log(time.getTime() < new Date());
+          return time.getTime() < new Date() - 1000 * 60 * 60 * 24;
+        }
+      },
       currentTab: 0,
       tabs: [
         { icon: "iconfont icondancheng", name: "单程" },
         { icon: "iconfont iconshuangxiang", name: "往返" }
-      ]
+      ],
+      form: {
+        departCity: "", // 出发城市
+        destCity: "", // 到达城市
+        departDate: "", // 出发日期
+        departCode: "", // 出发城市代码
+        destCode: "" // 到达城市代码
+      }
     };
   },
   methods: {
     // tab栏切换
     handleSearchTab(index) {
-      this.currentTab = index;
+      // this.currentTab = index;
+      if (index === 1) {
+        this.$confirm("目前暂不支持往返，请使用单程选票！", "提示", {
+          confirmButtonText: "确定",
+          showCancelButton: false,
+          type: "warning"
+        });
+      }
     },
     //**出发城市 */
     // 出发城市输入框获得焦点时触发
-    queryDepartSearch(value, cd) {
-      cd([{ value: 1 }, { value: 2 }, { value: 3 }]);
+    async queryDepartSearch(value, cd) {
+      const arr = await this.querySearchCity(value);
+      if (arr.length > 0) {
+        this.form.departCity = arr[0].value;
+        this.form.departCode = arr[0].sort;
+      }
+      cd(arr);
     },
     // 出发城市下拉选择时触发
-    handleDepartSelect() {},
+    handleDepartSelect(item) {
+      // console.log(item);
+      this.form.departCity = item.value;
+      this.form.departCode = item.sort;
+    },
 
     /** 到达城市 */
     // 目标城市输入框获得焦点时触发
-    queryDestSearch(value, cd) {
-      cd([{ value: 1 }, { value: 2 }, { value: 3 }]);
+    async queryDestSearch(value, cd) {
+      const arr = await this.querySearchCity(value);
+      if (arr.length > 0) {
+        this.form.destCity = arr[0].value;
+        this.form.destCode = arr[0].sort;
+      }
+
+      cd(arr);
     },
     //  目标城市下拉选择时触发
-    handleDestSelect() {},
+    handleDestSelect(item) {
+      this.form.destCity = item.value;
+      this.form.destCode = item.sort;
+    },
     /** 确认选择日期时触发 */
-    handleDate() {},
+    handleDate(value) {
+      this.form.departDate = moment(value).format("YYYY-MM-DD");
+    },
     /** 触发和目标城市切换时触发 */
-    handleReverse() {},
-    /** 提交表单是触发 */
-    handleSubmit() {}
+    handleReverse() {
+      const { destCity, destCode, departCity, departCode } = this.form;
+
+      this.form.destCity = departCity;
+      this.form.destCode = departCode;
+
+      this.form.departCity = destCity;
+      this.form.departCode = destCode;
+    },
+    /** 提交表时触发 */
+    handleSubmit() {
+      const rules = {
+        departCity: {
+          value: this.form.departCity,
+          message: "请选择出发城市"
+        },
+        destCity: {
+          value: this.form.destCity,
+          message: "请选择到达城市"
+        },
+        departDate: {
+          value: this.form.departDate,
+          message: "请选择出发时间"
+        }
+      };
+      let valid = true;
+
+      Object.keys(rules).forEach(v => {
+        if (!valid) return;
+
+        if (!rules[v].value) {
+          valid = false;
+          this.$message.warning(rules[v].message);
+        }
+      });
+      if (valid) {
+        this.$router.push({
+          path: "/air/flights",
+          query: this.form
+        });
+        // console.log(this.form);
+      }
+
+      const airs = JSON.parse(localStorage.getItem("airs ") || `[]`);
+      airs.unshift(this.form);
+      if (airs.length > 5) {
+        airs.length = 5;
+      }
+      localStorage.setItem("airs ", JSON.stringify(airs));
+    },
+    querySearchCity(queryString) {
+      return new Promise((resolve, reject) => {
+        if (!queryString.trim()) {
+          resolve([]);
+          return;
+        }
+
+        this.$axios({
+          url: "/airs/city",
+          params: {
+            name: queryString
+          }
+        }).then(res => {
+          const { data } = res.data;
+          const newData = data.map(v => {
+            return {
+              ...v,
+              value: v.name.replace("市", "")
+            };
+          });
+
+          // this.form.destCity = newData[0].value;
+          // this.form.destCode = newData[0].sort;
+
+          resolve(newData);
+        });
+        // cd(newData);
+      });
+    }
   }
 };
 </script>
@@ -194,6 +307,9 @@ export default {
       text-align: center;
       line-height: 20px;
       border-radius: 2px;
+      &:hover {
+        cursor: pointer;
+      }
       &::before,
       &::after {
         display: block;

@@ -60,6 +60,5 @@ export const actions = {
       store.commit("setUserInfo", res.data);
     });
   }
-
 }
 

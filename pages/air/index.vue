@@ -33,19 +33,19 @@
           class="iconfont iconweibiaoti-_huabanfuben"
           style="color:#409EFF;"
         ></i>
-        100%航协认证</el-col>
+        <span>100%航协认证</span></el-col>
       <el-col :span='8'>
         <i
           class="iconfont iconbaozheng"
           style="color:green;"
         ></i>
-        出行保证</el-col>
+        <span>出行保证</span></el-col>
       <el-col :span='8'>
         <i
           class="iconfont icondianhua"
           style="color:#409EFF;"
         ></i>
-        7x24小时服务</el-col>
+        <span>7x24小时服务</span></el-col>
     </el-row>
 
     <h2 class="air-sale-title">
@@ -62,21 +62,18 @@
       >
         <el-col
           :span="6"
-          v-for="(item,index) in 4"
+          v-for="(item,index) in sales"
           :key="index"
         >
-          <nuxt-link to="#">
-            <img
-              src="https://gss2.bdstatic.com/9fo3dSag_xI4khGkpoWK1HF6hhy/baike/s%3D220/sign=d4e2f29522381f309a198aab99004c67/6a63f6246b600c33cd891e65104c510fd8f9a1af.jpg"
-              alt=""
-            >
+          <nuxt-link :to="`/air/flights?departCity=${item.departCity}&departCode=${item.departCode}&destCity=${item.destCity}&destCode=${item.destCode}&departDate=${item.departDate}`">
+            <img :src="item.cover" />
             <el-row
               type="flex"
               justify="space-between"
               class="layer-bar"
             >
-              <span>广州 - 上海</span>
-              <span>￥699</span>
+              <span>{{item.departCity}} - {{item.destCity}}</span>
+              <span>￥{{Number(item.price).toFixed(2)}}</span>
             </el-row>
           </nuxt-link>
         </el-col>
@@ -89,10 +86,21 @@
 import SearchForm from "@/components/air/searchForm";
 export default {
   data() {
-    return {};
+    return {
+      sales: []
+    };
   },
   components: {
     SearchForm
+  },
+  mounted() {
+    this.$axios({
+      url: "/airs/sale"
+    }).then(res => {
+      // console.log(res.data);
+      const { data } = res.data;
+      this.sales = data;
+    });
   }
 };
 </script>
@@ -118,6 +126,9 @@ export default {
   background: #f5f5f5;
   padding: 10px 0;
   // box-sizing: border-box;
+  > div * {
+    vertical-align: middle;
+  }
   > div {
     text-align: center;
     line-height: 38px;
