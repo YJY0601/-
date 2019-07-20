@@ -38,6 +38,22 @@ export const mutations = {
 
 //  异步修改仓库
 export const actions = {
+  //** 手机发送验证码 */
+  sendCode(store, phoneNum) {
+    return this.$axios({
+      url: "/captchas",
+      method: "POST",
+      data: {
+        tel: phoneNum
+      }
+    }).then(res => {
+      const { code } = res.data
+      // console.log(code);
+      return code
+    })
+
+  },
+
 
   // 处理登录的方法, actions的第一个参数store对象， 第二个参数是传入的参数
   login(store, data) {
@@ -46,7 +62,7 @@ export const actions = {
       method: "POST",
       data
     }).then(res => {
-      console.log(res);
+      // console.log(res);
       store.commit("setUserInfo", res.data);
     });
   },
@@ -56,7 +72,7 @@ export const actions = {
       method: "POST",
       data: props
     }).then(res => {
-      console.log(res);
+      // console.log(res);
       store.commit("setUserInfo", res.data);
     });
   }

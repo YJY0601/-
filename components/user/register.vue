@@ -124,15 +124,8 @@ export default {
   },
   methods: {
     handleSendCaptcha() {
-      if (!this.form.username) {
-        this.$confirm("手机号码不能为空", "提示", {
-          confirmButtonText: "确定",
-          showCancelButton: false,
-          type: "warning"
-        });
-        return;
-      }
-      if (this.form.username.length !== 11) {
+      const phoneNum = this.form.username;
+      if (!phoneNum || phoneNum.length !== 11) {
         this.$confirm("手机号码格式错误,请重新输入!", "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,
@@ -140,16 +133,16 @@ export default {
         });
         return;
       }
-
-      this.$axios({
-        url: "/captchas",
-        method: "POST",
-        data: {
-          tel: this.form.username
-        }
-      }).then(res => {
-        const { code } = res.data;
-        this.$confirm(`模拟手机验证码为：${code}`, "提示", {
+      // if (this.form.username.length !== 11) {
+      //   this.$confirm("手机号码格式错误,请重新输入!", "提示", {
+      //     confirmButtonText: "确定",
+      //     showCancelButton: false,
+      //     type: "warning"
+      //   });
+      //   return;
+      // }
+      this.$store.dispatch("user/sendCode", phoneNum).then(res => {
+        this.$confirm(`模拟手机验证码为：${res}`, "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,
           type: "warning"

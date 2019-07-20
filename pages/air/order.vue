@@ -5,33 +5,37 @@
       justify="space-between"
     >
       <!-- 订单表单 -->
-      <div class="main">
-        <OrderForm />
-      </div>
+      <OrderForm />
+      <!-- <OrderForm @setInfoData="setInfoData" /> -->
 
       <!-- 侧边栏 -->
-      <div class="aside">
-        <OrderAside :data="infoData" />
-      </div>
+      <OrderAside :data="$store.state.air.infoData" />
     </el-row>
   </div>
 </template>
 
 <script>
-import OrderForm from "@/components/air/orderForm";
-import OrderAside from "@/components/air/orderAside";
+import OrderForm from "@/components/air/orderForm.vue";
+import OrderAside from "@/components/air/orderAside.vue";
+
 export default {
   data() {
     return {
-      infoData: {
-        insurances: [], // 初始化保险数据
-        seat_infos: {}
-      }
+      // infoData: { // 机票订单的信息
+      //     seat_infos: {}
+      // },
     };
   },
   components: {
     OrderForm,
     OrderAside
+  },
+
+  methods: {
+    // 给子组件使用的，返回机票订单的信息
+    // setInfoData(data){
+    //     this.infoData = data;
+    // }
   }
 };
 </script>

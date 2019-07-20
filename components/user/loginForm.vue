@@ -58,7 +58,8 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           this.$store.dispatch("user/login", this.form).then(res => {
-            this.$router.push("/");
+            // this.$router.push("/");
+            this.$router.back();
           });
         }
       });
